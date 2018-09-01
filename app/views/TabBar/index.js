@@ -2,7 +2,7 @@
  * @Author: liuxin 
  * @Date: 2018-08-30 21:46:08 
  * @Last Modified by: liuxin
- * @Last Modified time: 2018-08-30 23:50:43
+ * @Last Modified time: 2018-09-01 01:13:42
  */
 
 import React, { Component } from 'react';
@@ -12,10 +12,17 @@ import {
   View,
   ScrollView,
 } from 'react-native';
-import ScrollList from '../ScrollList'
-
+import ScrollList from '../ScrollList';
+import WebviewBridge from '../WebviewBridge';
 import BottomTabBar from './bottomTabBar';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
+
+const titles = [
+  '资讯',
+  '项目列表',
+  '其他',
+  '个人中心'
+]
 
 export default class TabBar extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -27,18 +34,36 @@ export default class TabBar extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      tabIndex: 0
+      tabIndex: 0,
+      source: encodeURIComponent('https://lxinr.top/reactsnowball/demo')
+    }
+  }
+
+  componentWillMount() {
+    const { navigation } = this.props
+    const { params } = navigation && navigation.state
+    let tab = (params && params.tab) || 0
+    this.props.navigation.setParams({otherParam: titles[Number(tab)]})
+    this.setState({
+      tabIndex: Number(tab)
+    })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log('-----------next---props----',nextProps)
+    if(nextProps.navigation.state.params.jump) {
+      const { navigation } = nextProps
+      const { params } = navigation && navigation.state
+      let tab = (params && params.tab) || 0
+      this.setState({
+        tabIndex: Number(tab)
+      })
     }
   }
 
   changePage = (i) => {
-    const titles = [
-      '资讯',
-      '项目',
-      '其他',
-      '个人中心'
-    ]
-    this.props.navigation.setParams({otherParam: titles[Number(i)]})
+    console.log('tabbar----',i,this.props)
+    this.props.navigation.setParams({otherParam: titles[Number(i)],tab: Number(i)})
     this.setState({
       tabIndex: Number(i)
     })
@@ -46,25 +71,25 @@ export default class TabBar extends Component {
 
   render() {
     const { navigation } = this.props
+    console.log('this.state.tabIndex---',this.state.tabIndex)
     return (
       <ScrollableTabView
         style={styles.container}
         renderTabBar={()=><BottomTabBar style={{borderWidth: 0, elevation: 0}} />}
+        initialPage={0}
+        page={this.state.tabIndex}
         onChangeTab = {
           (obj)=>{
             console.log('被选中的下标:'+obj.i);
             this.changePage(obj.i)
+            {/* this.props.navigation.navigate('News',{tab: 3}) */}
           }
         }
         locked={true}
         tabBarPosition='bottom'
       >
         <ScrollList navigation={navigation} tabLabel="ios-paper" style={styles.tabView} />
-        <ScrollView tabLabel="ios-list" style={styles.tabView}>
-          <View style={styles.card}>
-            <Text>项目页</Text>
-          </View>
-        </ScrollView>
+        <WebviewBridge tabLabel="ios-list" style={styles.tabView} navigation={navigation} source={this.state.source} />
         <ScrollView tabLabel="ios-analytics" style={styles.tabView}>
           <View style={styles.card}>
             <Text>其他页</Text>
