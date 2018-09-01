@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import Detail from './views/Detail';
 import TabBar from './views/TabBar';
 import WebviewBridge from './views/WebviewBridge';
-import { View,StatusBar } from 'react-native';
+import { View,StatusBar,Button } from 'react-native';
 import { createStackNavigator } from 'react-navigation';
 
 const RootStack = createStackNavigator(
@@ -41,7 +41,7 @@ export default class App extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        <StatusBar />
+        <StatusBar backgroundColor={'#f9f9f9'} />
         <RootStack />
       </View>
     )
